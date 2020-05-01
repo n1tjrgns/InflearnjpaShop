@@ -1,4 +1,4 @@
-﻿package com.jpabook.jpashop.exception;
+package com.jpabook.jpashop.exception;
 
 public class NotEnoughStockException extends RuntimeException{
 
