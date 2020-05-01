@@ -18,6 +18,7 @@ public class ItemRepository {
         if(item.getId() == null){
             em.persist(item);
         }else{
+            //이걸 그래서 merge말고 dirty checking해서 사용하도록 해야한다.
             em.merge(item);
         }
     }

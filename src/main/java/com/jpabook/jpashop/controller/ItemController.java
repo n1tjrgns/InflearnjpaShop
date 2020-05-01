@@ -66,7 +66,7 @@ public class ItemController {
 
     @PostMapping("/items/{itemId}/edit")
     //뷰에서 넘긴 폼을 받는다 @ModelAttribute
-    public String updateItem(@PathVariable String itemId, @ModelAttribute("form") BookForm form){
+    public String updateItem(@PathVariable Long itemId, @ModelAttribute("form") BookForm form){
 
         //post 방식으로 id를 넘겨줄때 웹 url에 injection공격을 당할 수 있기 때문에
         //서버에서 권한을 체크하는 로직을 넣어야한다.
@@ -79,6 +79,10 @@ public class ItemController {
         book.setIsbn(form.getIsbn());
 
         itemService.saveItem(book);
+
+        //위 코드를 dirty checking 가능한 아래 코드로 바꿔줘야 한다.
+        //업데이트 할 필드가 많으면 dto 계층을 만들어서 그 dto 클래스를 통째로 넘기면 된다.
+       //itemService.updateItem(itemId, 업데이트 할 목록들);
         return "redirect:/items";
     }
 }
