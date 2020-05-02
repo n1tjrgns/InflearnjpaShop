@@ -9,12 +9,48 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 public class MemberApiController {
 
     private final MemberService memberService;
+
+    //회원 조회 v1 -> 엔티티 직접 노출, @jsonignore 사용시 프레젠테이션 계층을 위한 로직이 추가됨
+    @GetMapping("/api/v1/members")
+    public List<Member> membersV1(){
+        return memberService.findMembers();
+    }
+
+    //회원 조회 v2
+    //현재  api 구조가 [ ] 안에 들어있기 때문에 유연성이 없어서, 한 번 감싸준다.
+    @GetMapping("/api/v2/members")
+    public Result memberV2(){
+        List<Member> findMembers = memberService.findMembers();
+        List<MemberDto> collect = new ArrayList<>();
+        for (Member m : findMembers) {
+            MemberDto memberDto = new MemberDto(m.getName());
+            collect.add(memberDto);
+        }
+
+        return new Result(collect);
+    }
+    
+    @Data
+    @AllArgsConstructor
+    static class Result<T> {
+        private T data;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class MemberDto{
+        private String name;
+    }
+    
+
 
     //api 같이 데이터 변경이 빈번한 상황에 엔티티를 외부로 노출시키면안됨
     //엔티티 칼럼에 NotEmpty 옵션을 주면 상황에 따라 많이 깨질 수 있어
