@@ -62,12 +62,25 @@ public class OrderRepository {
         return query.getResultList();
     }
 
-    //한 번에 필요한 쿼리를 fetch join으로 다 가져옴.
+    //v3 한 번에 필요한 쿼리를 fetch join으로 다 가져옴.
     public List<Order> findAllWithMemberDelivery() {
         return em.createQuery(
                 "select o from Order o" +
                         " join fetch o.member" +
                         " join fetch o.delivery", Order.class
         ).getResultList();
+    }
+
+    //v4 반환 클래스를 새로 생성한 DTO클래스로 해줌
+    //하지만 Order를 매핑해야하는데 DTO 클래스를 매핑 할 수가 없어
+    // 엔티티랑, 임베더블 클래스만 가능해
+    // 매핑 해주려면 new 를 사용해줘야함
+    public List<OrderSimpleQueryDto> findOrderDtos() {
+        return em.createQuery(
+                "select new com.jpabook.jpashop.repository.OrderSimpleQueryDto(o.id, m.name, o.orderDate, o.status, d.address)" +
+                " from Order o" +
+                " join o.member m" +
+                " join o.delivery d", OrderSimpleQueryDto.class)
+                .getResultList();
     }
 }

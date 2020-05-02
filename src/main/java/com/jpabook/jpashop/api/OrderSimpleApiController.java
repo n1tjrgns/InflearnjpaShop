@@ -5,6 +5,7 @@ import com.jpabook.jpashop.domain.Order;
 import com.jpabook.jpashop.domain.OrderStatus;
 import com.jpabook.jpashop.repository.OrderRepository;
 import com.jpabook.jpashop.repository.OrderSearch;
+import com.jpabook.jpashop.repository.OrderSimpleQueryDto;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,6 +70,7 @@ public class OrderSimpleApiController {
     }
 
     //fetch join 을 사용하여 N+1 해결
+    //엔티티 조회 후 dto로 변환해서 조회
     @GetMapping("/api/v3/simple-orders")
     public List<SimpleOrderDto> ordersV3(){
         List<Order> orders = orderRepository.findAllWithMemberDelivery();
@@ -78,5 +80,11 @@ public class OrderSimpleApiController {
             result.add(simpleOrderDto);
         }
         return result;
+    }
+
+    //JPA에서 DTO 직접 조회
+   @GetMapping("/api/v4/simple-orders")
+    public List<OrderSimpleQueryDto> ordersV4(){
+        return orderRepository.findOrderDtos();
     }
 }
