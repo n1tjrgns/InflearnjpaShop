@@ -67,4 +67,16 @@ public class OrderSimpleApiController {
             address = order.getDelivery().getAddress(); //LAZY 초기화
         }
     }
+
+    //fetch join 을 사용하여 N+1 해결
+    @GetMapping("/api/v3/simple-orders")
+    public List<SimpleOrderDto> ordersV3(){
+        List<Order> orders = orderRepository.findAllWithMemberDelivery();
+        List<SimpleOrderDto> result = new ArrayList<>();
+        for (Order o : orders) {
+            SimpleOrderDto simpleOrderDto = new SimpleOrderDto(o);
+            result.add(simpleOrderDto);
+        }
+        return result;
+    }
 }
