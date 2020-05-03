@@ -9,6 +9,7 @@ import com.jpabook.jpashop.repository.OrderSearch;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -96,6 +97,7 @@ public class OrderApiController {
     @GetMapping("/api/v3/orders")
     public List<OrderDto> ordersV3(){
         List<Order> orders = orderRepository.findAllWithItem();
+
         List<OrderDto> result = new ArrayList<>();
         for (Order o : orders) {
             OrderDto orderDto = new OrderDto(o);
@@ -105,4 +107,20 @@ public class OrderApiController {
         return result;
     }
 
+    @GetMapping("/api/v3.1/orders")
+    public List<OrderDto> ordersV3_page(
+            @RequestParam(value = "offset", defaultValue = "0") int offset,
+            @RequestParam(value = "limit", defaultValue = "100") int limit){
+        //member와 delivery는 fetchjoin으로 한 번에 가져왔지만
+        List<Order> orders = orderRepository.findAllWithMemberDelivery(offset, limit);
+
+        //다시 아이템을 가져올 때는 order_id 만큼 가져오기 때문에 이 부분에서 반복 쿼리가 발생함
+        List<OrderDto> result = new ArrayList<>();
+        for (Order o : orders) {
+            OrderDto orderDto = new OrderDto(o);
+            result.add(orderDto);
+        }
+
+        return result;
+    }
 }

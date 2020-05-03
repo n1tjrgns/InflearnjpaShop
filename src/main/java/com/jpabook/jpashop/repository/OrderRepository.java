@@ -16,11 +16,11 @@ public class OrderRepository {
 
     private final EntityManager em;
 
-    public void save(Order order){
+    public void save(Order order) {
         em.persist(order);
     }
 
-    public Order findOne(Long id){
+    public Order findOne(Long id) {
         return em.find(Order.class, id);
     }
 
@@ -43,7 +43,7 @@ public class OrderRepository {
 
 
     //JPA Criteria
-    public List<Order> findAllByCriteria(OrderSearch orderSearch){
+    public List<Order> findAllByCriteria(OrderSearch orderSearch) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Order> cq = cb.createQuery(Order.class);
         Root<Order> o = cq.from(Order.class);
@@ -52,7 +52,7 @@ public class OrderRepository {
         List<Predicate> criteria = new ArrayList<>();
 
         //주문 상태 검색
-        if(orderSearch.getOrderStatus() != null){
+        if (orderSearch.getOrderStatus() != null) {
             Predicate name = cb.like(m.<String>get("name"), "%" + orderSearch.getMemberName() + "%");
             criteria.add(name);
         }
@@ -71,6 +71,17 @@ public class OrderRepository {
         ).getResultList();
     }
 
+    //페이징 버전
+    public List<Order> findAllWithMemberDelivery(int offset, int limit) {
+        return em.createQuery(
+                "select o from Order o" +
+                        " join fetch o.member" +
+                        " join fetch o.delivery", Order.class)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
+    }
+
     //v4 반환 클래스를 새로 생성한 DTO클래스로 해줌
     //하지만 Order를 매핑해야하는데 DTO 클래스를 매핑 할 수가 없어
     // 엔티티랑, 임베더블 클래스만 가능해
@@ -78,9 +89,9 @@ public class OrderRepository {
     public List<OrderSimpleQueryDto> findOrderDtos() {
         return em.createQuery(
                 "select new com.jpabook.jpashop.repository.OrderSimpleQueryDto(o.id, m.name, o.orderDate, o.status, d.address)" +
-                " from Order o" +
-                " join o.member m" +
-                " join o.delivery d", OrderSimpleQueryDto.class)
+                        " from Order o" +
+                        " join o.member m" +
+                        " join o.delivery d", OrderSimpleQueryDto.class)
                 .getResultList();
     }
 
@@ -96,3 +107,4 @@ public class OrderRepository {
                 .getResultList();
     }
 }
+
