@@ -92,4 +92,17 @@ public class OrderApiController {
             }
         }
     }
+
+    @GetMapping("/api/v3/orders")
+    public List<OrderDto> ordersV3(){
+        List<Order> orders = orderRepository.findAllWithItem();
+        List<OrderDto> result = new ArrayList<>();
+        for (Order o : orders) {
+            OrderDto orderDto = new OrderDto(o);
+            result.add(orderDto);
+        }
+
+        return result;
+    }
+
 }
