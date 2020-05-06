@@ -6,6 +6,7 @@ import com.jpabook.jpashop.domain.OrderItem;
 import com.jpabook.jpashop.domain.OrderStatus;
 import com.jpabook.jpashop.repository.OrderRepository;
 import com.jpabook.jpashop.repository.OrderSearch;
+import com.jpabook.jpashop.repository.order.query.OrderFlatDto;
 import com.jpabook.jpashop.repository.order.query.OrderQueryDto;
 import com.jpabook.jpashop.repository.order.query.OrderQueryRepository;
 import lombok.Getter;
@@ -22,12 +23,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequiredArgsConstructor
 public class OrderApiController {
-    
+
     private final OrderRepository orderRepository;
     private final OrderQueryRepository orderQueryRepository;
-    
+
     @GetMapping("/api/v1/orders")
-    public List<Order> orderV1(){
+    public List<Order> orderV1() {
         List<Order> all = orderRepository.findAllByCriteria(new OrderSearch());
         for (Order order : all) {
             order.getMember().getName();
@@ -36,15 +37,15 @@ public class OrderApiController {
             //강제 초기화
             List<OrderItem> orderItems = order.getOrderItems();
             for (OrderItem orderItem : orderItems) {
-                orderItems.stream().forEach(o ->orderItem.getItem().getName());
+                orderItems.stream().forEach(o->orderItem.getItem().getName());
             }
         }
-            return all;
+        return all;
     }
 
     //V2 -> DTO로 변환
     @GetMapping("/api/v2/orders")
-    public List<OrderDto> ordersV2(){
+    public List<OrderDto> ordersV2() {
         List<Order> orders = orderRepository.findAllByCriteria(new OrderSearch());
 
         List<OrderDto> collect = new ArrayList<>();
@@ -57,7 +58,7 @@ public class OrderApiController {
     }
 
     @Getter
-    static class OrderDto{
+    static class OrderDto {
 
         private Long orderId;
         private String name;
@@ -78,12 +79,12 @@ public class OrderApiController {
             //order.getOrderItems().stream().forEach(o -> o.getItem().getName());
             //orderItems = order.getOrderItems();
             orderItems = order.getOrderItems().stream()
-                    .map(orderItem -> new OrderItemDto(orderItem))
+                    .map(orderItem->new OrderItemDto(orderItem))
                     .collect(Collectors.toList());
         }
 
         @Getter
-        static class OrderItemDto{
+        static class OrderItemDto {
 
             private String itemName; //상품 명
             private int orderPrice; //주문 가격
@@ -98,7 +99,7 @@ public class OrderApiController {
     }
 
     @GetMapping("/api/v3/orders")
-    public List<OrderDto> ordersV3(){
+    public List<OrderDto> ordersV3() {
         List<Order> orders = orderRepository.findAllWithItem();
 
         List<OrderDto> result = new ArrayList<>();
@@ -113,7 +114,7 @@ public class OrderApiController {
     @GetMapping("/api/v3.1/orders")
     public List<OrderDto> ordersV3_page(
             @RequestParam(value = "offset", defaultValue = "0") int offset,
-            @RequestParam(value = "limit", defaultValue = "100") int limit){
+            @RequestParam(value = "limit", defaultValue = "100") int limit) {
         //member와 delivery는 fetchjoin으로 한 번에 가져왔지만
         List<Order> orders = orderRepository.findAllWithMemberDelivery(offset, limit);
 
@@ -128,12 +129,29 @@ public class OrderApiController {
     }
 
     @GetMapping("/api/v4/orders")
-    public List<OrderQueryDto> ordersV4(){
+    public List<OrderQueryDto> ordersV4() {
         return orderQueryRepository.findOrderQueryDtos();
     }
 
     @GetMapping("/api/v5/orders")
-    public List<OrderQueryDto> ordersV5(){
+    public List<OrderQueryDto> ordersV5() {
         return orderQueryRepository.findAllByDto_optimazation();
     }
+
+    //쿼리 한번에 모든 데이터를 다 불러옴. flat data
+    @GetMapping("/api/v6/orders")
+    public List<OrderFlatDto> ordersV6() {
+        return orderQueryRepository.findAllByDto_flat();
+    }
+
+    //OrderQueryDto 처럼 api 스펙을 맞추고 싶은 경우 노가다 필요요
+    /*@GetMapping("/api/v6.1/orders")
+    public List<OrderQueryDto> ordersV6_formatcustom() {
+        //중복을 직접 걸러낸다.
+        List<OrderFlatDto> flats = orderQueryRepository.findAllByDto_flat();
+
+        return flats.stream()
+                .collect(groupingBy(o->new OrderQueryDto(o.getOrderId(), o.getName(), o.getOrderDate(), o.getOrderStatus(), o.getAddress()),
+                mapping(o->new OrderItemQueryDto(o.getOrderId(), o.getItemName(), o.getOrderPrice(), o.getCount()), toList()))).entrySet().stream().map(e->new OrderQueryDto(e.getKey().getOrderId(), e.getKey().getName(), e.getKey().getOrderDate(), e.getKey().getOrderStatus(), e.getKey().getAddress(), e.getValue())).collect(toList());
+    }*/
 }
