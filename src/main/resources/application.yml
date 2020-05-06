@@ -15,7 +15,7 @@ spring:
         format_sql: true
         default_batch_fetch_size: 100 # 쿼리 where in 절 안의 조건 갯수 설정
     #database-platform: org.hibernate.dialect.H2Dialect
-
+    open-in-view: false # OSIV 설정 값 변경
 logging:
   level:
     org.hibernate.SQL: debug #logeer용

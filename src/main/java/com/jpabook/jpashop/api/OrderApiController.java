@@ -9,6 +9,7 @@ import com.jpabook.jpashop.repository.OrderSearch;
 import com.jpabook.jpashop.repository.order.query.OrderFlatDto;
 import com.jpabook.jpashop.repository.order.query.OrderQueryDto;
 import com.jpabook.jpashop.repository.order.query.OrderQueryRepository;
+import com.jpabook.jpashop.service.query.OrderQueryService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -96,6 +97,13 @@ public class OrderApiController {
                 count = orderItem.getCount();
             }
         }
+    }
+
+    private final OrderQueryService orderQueryService;
+
+    @GetMapping("/api/v3/orders")
+    public List<OrderDto> ordersV3_Osiv() {
+        return orderQueryService.ordersV3_Osiv();
     }
 
     @GetMapping("/api/v3/orders")
